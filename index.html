@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, user-scalable=no">
+  <title>Weather App</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+  <link rel="stylesheet" href="css/weathericons.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+
+  <section id='app'>
+    <section class='weather_card'>
+      <section class='button_container'>
+        <button :class='"btn "+letter ' v-for="letter in this.letters" @click="loadCities(letter)">{{letter}}</button>    
+      </section>
+      <form>
+        <select class='input' v-model='city'>
+          <option disabled>Choisissez votre ville</option>
+          <option v-for="city in this.focusCities" v-bind:value="{id: city.id, nom: city.nm}">{{city.nm}}</option>
+        </select>
+      </form>
+      <transition name="fade" mode="out-in">
+        <article v-if="this.focusMeteo != '' && this.nextFocusMeteo.length > 0">
+          <p class='title_card'>{{city.nom}}</p>
+          <p class='subtitle_card'>{{this.focusMeteo.day}}</p>
+          <i :class="'wi wi-icon-'+this.focusMeteo.weather[0].id"></i>
+          <p class='text_card'>{{Math.round(this.focusMeteo.main.temp)}}°</p>
+          <div class='row'>
+            <div class='col_3' v-for="data in this.nextFocusMeteo">
+              <p class='title_card'>{{data.day}}</p>
+              <i :class="'wi wi-icon-'+data.icone"></i>
+              <p class='text_card'>{{data.temp_min}}°</p>
+              <p class='text_card'>{{data.temp_max}}°</p>
+            </div>
+          </div>
+        </article>
+        <div v-else class="spinner">
+          <div class="double-bounce1"></div>
+          <div class="double-bounce2"></div>
+        </div>
+      </transition>
+    </section>
+  </section>
+
+  <script>
+  new Vue({
+    el: '#app',
+    data: function(){
+      return{
+        city : '',
+        allCities: [],
+        focusCities:[],
+        focusMeteo:'',
+        nextFocusMeteo:[],
+        stateMounted:false,
+        letters:['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'],
+        days:['Lun','Mar','Mer','Jeu','Ven','Sam','Dim']
+      }
+    },
+    mounted(){
+      this.loadCities('A')
+    },
+    methods: {
+      loadCities: function(letter){
+        /* Gestion des boutons actifs */
+        let btns = document.querySelectorAll('.btn')
+        for (var i = 0; i < btns.length; i++) {
+          btns[i].classList.remove('active')
+        }
+        document.querySelector('.'+letter).classList.add('active')
+
+
+        axios.get("./cities-fr.json").then(response => {
+          this.focusCities = []
+          this.allCities = response.data
+          for (var i = 0; i < this.allCities.length; i++) {
+            if(this.allCities[i].nm.charAt(0) === letter){
+              this.focusCities.push(this.allCities[i])
+            }
+          }
+          if(this.stateMounted == false){
+            this.city = {nom: this.focusCities[0].nm, id: this.focusCities[0].id}
+            this.stateMounted = true
+          }
+        })
+      }
+    },
+    watch:{
+      city: function(){
+
+        /* Réinitialisation des tableaux */
+        this.focusMeteo = []
+        this.nextFocusMeteo = []
+
+        axios.get("http://api.openweathermap.org/data/2.5/forecast?units=metric&id="+this.city.id+"&appid=f4c84cdb38cf4d3207cd127cbebf3019").then(response => {
+          /* Variable date */
+          let data = response.data.list
+          let previsionsDays
+          let threeDays = 0
+          let date = new Date()
+          let currentDate = date.getDate()
+          /* Variable meteo */
+          let icone
+          let tempMax
+          let tempMin
+          let datePrevision
+          /* Variable etat */
+          let index = 0
+          let tab
+
+
+          /* Récupération de la météo actuelle */
+          this.focusMeteo = data[0]
+          this.focusMeteo.day = this.days[date.getDay() - 1]
+
+          /* Récupération des prévisions */
+          for (var i = 0; i < data.length; i++) {
+
+            /* Récupération de la date */
+            previsionsDays = parseInt(data[i].dt_txt.slice(8, 11))
+            if(currentDate !== previsionsDays && threeDays < 6){
+
+              /* Récupération de la météo du matin */
+              if(data[i].dt_txt.split(" ").pop() === '09:00:00'){
+                tempMin = Math.round(data[i].main.temp_min)
+                threeDays++
+              }
+
+              /* Récupération de la météo de l'après midi */
+              if(data[i].dt_txt.split(" ").pop() === '15:00:00'){
+                tempMax = Math.round(data[i].main.temp_max)
+                icone = data[i].weather[0].id
+                threeDays++
+                datePrevision = this.days[date.getDay() + index]
+              }
+            }
+
+            /* Push des variable */
+            if(tempMax != null && tempMin != null && icone !== null && datePrevision !== null){
+                tab = {'temp_max':  tempMax, 'temp_min': tempMin, 'icone': icone, 'day': datePrevision}
+                this.nextFocusMeteo.push(tab)
+                index++
+                tempMax = null
+                tempMin = null
+                icone = null
+                datePrevision = null
+            }
+          }
+
+        })
+      }
+    }
+  });
+  </script>
+</body>
+</html>

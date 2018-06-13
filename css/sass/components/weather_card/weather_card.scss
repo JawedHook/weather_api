@@ -1,0 +1,58 @@
+
+.weather_card{
+	-webkit-box-shadow:$shadowBox;
+	-moz-box-shadow:$shadowBox;
+	box-shadow:$shadowBox;
+	border-radius:5px;
+	position:absolute;
+	top:50%;
+	left:50%;
+	background:#FAFAFA;
+	transform:translateX(-50%) translateY(-50%);
+	max-width:calc(100% - 90px);
+	width:500px;
+	padding:30px;
+	.title_card{
+		margin:20px 0 10px;
+		padding:5px 0;
+		font-family:$fontText;
+		font-size:23px;
+		text-align:center;
+		background:$grey;
+		color:$lightGrey;
+	}
+	.subtitle_card{
+		font-family:$fontText;
+		margin-bottom:5px;
+		text-align:center;
+		font-size:20px;
+		color:$grey;
+	}
+	.text_card{
+		font-family:$fontText;
+		margin-top:5px;
+		text-align:center;
+		font-size:18px;
+		color:$grey;
+	}
+	.wi{
+		display:block;
+		margin:auto;
+		color:$grey;
+		text-align:center;
+		font-size: 60px;
+		line-height: 90px;
+	}
+	.row{
+		display:flex;
+		.col_3{
+			width:calc(33.333% - 10px);
+			margin-left:15px;
+			&:first-child{
+				margin-left:0;
+			}
+		}
+	}
+}
+
+@import 'responsive';

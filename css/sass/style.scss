@@ -1,0 +1,19 @@
+*{
+	margin:0;
+	padding:0;
+}
+
+@import 'variable';
+@import 'transition';
+@import 'components/form';
+@import 'components/loader';
+@import 'components/buttons';
+@import 'components/weather_card/weather_card';
+
+#app{
+	padding:20px 0;
+	position:relative;
+	min-height:calc(100vh - 40px);
+	min-width:100%;
+	background-image: $blueGradient;
+}

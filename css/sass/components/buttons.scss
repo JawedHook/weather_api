@@ -1,0 +1,22 @@
+.button_container{
+	display:flex;
+	flex-flow: row wrap;
+	justify-content:center;
+	margin-bottom:20px;
+	.btn{
+		padding:5px 7px;
+		background:none;
+		border:1px solid $lightGrey;
+		border-radius:2px;
+		margin:0 5px 5px;
+		transition:.2s;
+		&:focus{
+			outline:none;
+		}
+		&:hover, &.active{
+			color:$lightGrey;
+			background:$grey;
+			border:1px solid $grey;
+		}
+	}
+}
